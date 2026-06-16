@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /proposito/
+    
+    # No aplicar reglas si el archivo o directorio ya existe
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Redirigir el resto de peticiones al index.php local
+    RewriteRule ^(.*)$ index.php [L,QSA]
+</IfModule>

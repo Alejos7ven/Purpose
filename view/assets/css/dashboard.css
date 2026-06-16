@@ -1,0 +1,627 @@
+/* Estilos para el Dashboard de MarryStock */
+
+:root {
+    --bg-main: #FDFBF7;
+    --bg-pink-light: #FFF0F2;
+    --primary-rose: #D4A3AE;
+    --primary-rose-hover: #C2939F;
+    --primary-rose-light: #FCEFF1;
+    --text-dark: #5C4146;
+    --text-muted: #8C6F74;
+    --border-color: #EADCE0;
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
+    
+    /* Milestone Colors */
+    --milestone-noviazgo: #FFF0F2;
+    --milestone-compromiso: #FFF5EE;
+    --milestone-matrimonio: #EBF7F2;
+    --text-noviazgo: #A65F6E;
+    --text-compromiso: #A67551;
+    --text-matrimonio: #4E8A6D;
+}
+
+body {
+    background-color: var(--bg-main);
+    font-family: var(--font-body);
+    color: var(--text-dark);
+}
+
+/* Navbar */
+.navbar-custom {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(212, 163, 174, 0.15);
+}
+
+.brand-text {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--text-dark);
+    font-size: 1.5rem;
+}
+
+.brand-icon {
+    color: var(--primary-rose);
+    font-size: 1.4rem;
+}
+
+.user-pill {
+    background-color: var(--primary-rose-light);
+    color: var(--text-dark);
+    border-radius: 50px;
+    font-size: 0.85rem;
+}
+
+.btn-logout {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    padding: 0.4rem 1.2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+    background-color: #FFF0F2;
+    color: var(--primary-rose-hover);
+    border-color: var(--primary-rose);
+}
+
+/* Loading Spinner */
+.text-rose {
+    color: var(--primary-rose) !important;
+}
+
+/* No Project Screen */
+.no-project-card {
+    background-color: #ffffff;
+    border-radius: 24px;
+    border: 1px solid rgba(212, 163, 174, 0.1);
+}
+
+.illustration-area {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 100px;
+    height: 100px;
+    background-color: var(--primary-rose-light);
+    border-radius: 50%;
+}
+
+.illustration-icon {
+    font-size: 3rem;
+    color: var(--primary-rose);
+}
+
+.section-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+}
+
+.btn-create-project {
+    background-color: var(--primary-rose);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-create-project:hover {
+    background-color: var(--primary-rose-hover);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(212, 163, 174, 0.3);
+}
+
+/* Project Header Card */
+.project-header-card {
+    border-radius: 24px;
+    background-color: #ffffff;
+}
+
+.project-img-container {
+    height: 250px;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(135deg, var(--primary-rose-light) 0%, var(--bg-pink-light) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.project-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.project-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--text-dark);
+    font-size: 2rem;
+}
+
+.btn-edit-project {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-edit-project:hover {
+    background-color: var(--primary-rose-light);
+    color: var(--primary-rose);
+    border-color: var(--primary-rose);
+}
+
+.participant-card {
+    background-color: #FAF6F7;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 163, 174, 0.08);
+}
+
+.participant-icon {
+    font-size: 1.8rem;
+    color: var(--primary-rose);
+}
+
+.pareja-icon {
+    color: #E6B89C;
+}
+
+/* Milestone Cards */
+.milestone-card {
+    border-radius: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.milestone-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(140, 111, 116, 0.08) !important;
+}
+
+.bg-milestone-noviazgo {
+    background-color: var(--milestone-noviazgo);
+}
+.bg-milestone-compromiso {
+    background-color: var(--milestone-compromiso);
+}
+.bg-milestone-matrimonio {
+    background-color: var(--milestone-matrimonio);
+}
+
+.milestone-icon {
+    font-size: 2.2rem;
+}
+.bg-milestone-noviazgo .milestone-icon { color: var(--text-noviazgo); }
+.bg-milestone-compromiso .milestone-icon { color: var(--text-compromiso); }
+.bg-milestone-matrimonio .milestone-icon { color: var(--text-matrimonio); }
+
+.milestone-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+}
+
+.milestone-date {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    margin: 0.3rem 0;
+}
+
+.milestone-counter {
+    font-weight: 600;
+}
+.bg-milestone-noviazgo .milestone-counter { color: var(--text-noviazgo); }
+.bg-milestone-compromiso .milestone-counter { color: var(--text-compromiso); }
+.bg-milestone-matrimonio .milestone-counter { color: var(--text-matrimonio); }
+
+
+/* Tabs Customization */
+.custom-tabs {
+    border-bottom: 2px solid var(--border-color);
+}
+
+.custom-tabs .nav-link {
+    border: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 1rem;
+    background: transparent;
+    transition: all 0.2s ease;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+}
+
+.custom-tabs .nav-link:hover {
+    color: var(--primary-rose);
+}
+
+.custom-tabs .nav-link.active {
+    color: var(--primary-rose);
+    border-bottom: 3px solid var(--primary-rose);
+    background: transparent;
+}
+
+.tab-content-card {
+    border-radius: 20px;
+    background-color: #ffffff;
+}
+
+.pane-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+/* Add Item Button */
+.btn-add-item {
+    background-color: var(--primary-rose);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-add-item:hover {
+    background-color: var(--primary-rose-hover);
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(212, 163, 174, 0.25);
+}
+
+.btn-necesidad {
+    background-color: #E6B89C;
+}
+.btn-necesidad:hover {
+    background-color: #D19C7C;
+    box-shadow: 0 4px 10px rgba(230, 184, 156, 0.25);
+}
+
+/* Filters */
+.search-group {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+.search-group .form-control {
+    border: none;
+    padding: 0.6rem;
+}
+.select-filter {
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    padding: 0.6rem;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+}
+.select-filter:focus, .search-group input:focus {
+    box-shadow: none;
+    border-color: var(--primary-rose);
+}
+
+/* Table Customization */
+.custom-table {
+    margin-bottom: 0;
+}
+.custom-table th {
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
+    padding: 1rem 0.75rem;
+}
+.custom-table td {
+    padding: 1rem 0.75rem;
+    color: var(--text-dark);
+    border-bottom: 1px solid #FAF0F2;
+}
+.item-category-badge {
+    background-color: #FAF0F2;
+    color: var(--primary-rose);
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.badge-cat-electrodomesticos { background-color: #E8F4FC !important; color: #1F618D !important; }
+.badge-cat-muebles { background-color: #FEF9E7 !important; color: #9A7D0A !important; }
+.badge-cat-cocina { background-color: #E8F8F5 !important; color: #117A65 !important; }
+.badge-cat-dormitorio { background-color: #F5EEF8 !important; color: #7D3C98 !important; }
+.badge-cat-bano { background-color: #EAF2F8 !important; color: #2471A3 !important; }
+.badge-cat-tecnologia { background-color: #FBEEE6 !important; color: #BA4A00 !important; }
+.badge-cat-decoracion { background-color: #EAFAF1 !important; color: #1E8449 !important; }
+.badge-cat-boda { background-color: #FDEDEC !important; color: #A93226 !important; }
+.badge-cat-otro { background-color: #F2F4F4 !important; color: #5F6A6A !important; }
+.badge-cat-default { background-color: #F8F9F9 !important; color: #7F8C8D !important; }
+.item-state-badge {
+    background-color: #FDF4EB;
+    color: #A67551;
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Actions Buttons */
+.btn-action {
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    padding: 0.25rem 0.4rem;
+    transition: color 0.15s ease;
+}
+.btn-action-edit {
+    color: var(--text-muted);
+}
+.btn-action-edit:hover {
+    color: #4A90E2;
+}
+.btn-action-delete {
+    color: var(--text-muted);
+}
+.btn-action-delete:hover {
+    color: #D9534F;
+}
+
+/* Need Card Grid */
+.need-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #FAF0F2;
+    transition: all 0.2s ease;
+}
+.need-card:hover {
+    box-shadow: 0 5px 15px rgba(212, 163, 174, 0.08);
+    border-color: rgba(212, 163, 174, 0.2);
+}
+.need-card.acquired {
+    background-color: #F8F9FA;
+    border-color: #E2E3E5;
+    opacity: 0.8;
+}
+.need-card.acquired .need-title {
+    text-decoration: line-through;
+    color: #6C757D;
+}
+.need-title {
+    font-weight: 700;
+    color: var(--text-dark);
+}
+.badge-priority-alta {
+    background-color: #FCE8EB;
+    color: #D9534F;
+}
+.badge-priority-media {
+    background-color: #FDF0E6;
+    color: #D97724;
+}
+.badge-priority-baja {
+    background-color: #EBF6FF;
+    color: #337AB7;
+}
+
+.btn-acquire-toggle {
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    transition: all 0.15s ease;
+}
+.btn-pending-style {
+    background-color: #FFF0F2;
+    color: var(--primary-rose);
+    border: 1px dashed var(--primary-rose);
+}
+.btn-pending-style:hover {
+    background-color: var(--primary-rose);
+    color: #ffffff;
+    border-style: solid;
+}
+.btn-acquired-style {
+    background-color: #E2F0D9;
+    color: #385723;
+    border: 1px solid #C5E0B4;
+}
+.btn-acquired-style:hover {
+    background-color: #F2DCDB;
+    color: #C00000;
+    border-color: #E6B9B8;
+}
+
+.btn-move-inventory {
+    background-color: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #C8E6C9;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    transition: all 0.15s ease;
+}
+.btn-move-inventory:hover {
+    background-color: #2E7D32;
+    color: #ffffff;
+    border-color: #2E7D32;
+}
+
+/* Modals Customization */
+.modal-custom {
+    border-radius: 20px;
+}
+.modal-custom .modal-header {
+    padding: 1.5rem 1.5rem 0.5rem;
+}
+.modal-custom .modal-footer {
+    padding: 0.5rem 1.5rem 1.5rem;
+}
+.btn-primary-custom {
+    background-color: var(--primary-rose);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 0.5rem 1.25rem;
+    transition: all 0.2s ease;
+}
+.btn-primary-custom:hover {
+    background-color: var(--primary-rose-hover);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+.btn-secondary-custom {
+    background-color: #EBEBEB;
+    color: #4F4F4F;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 0.5rem 1.25rem;
+    transition: all 0.2s ease;
+}
+.btn-secondary-custom:hover {
+    background-color: #DFDFDF;
+    color: #4F4F4F;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-rose);
+    box-shadow: 0 0 0 4px rgba(212, 163, 174, 0.15);
+}
+
+/* Prevent iOS auto-zoom on focus by enforcing at least 16px font size */
+@media screen and (max-width: 767px) {
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* Statistics Pane Styling */
+.kpi-card {
+    border-radius: 18px;
+    border: 1px solid rgba(212, 163, 174, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(140, 111, 116, 0.06) !important;
+}
+
+.bg-kpi-inversion {
+    background-color: var(--milestone-noviazgo) !important;
+}
+
+.bg-kpi-presupuesto {
+    background-color: var(--milestone-compromiso) !important;
+}
+
+.bg-kpi-progreso {
+    background-color: var(--milestone-matrimonio) !important;
+}
+
+.kpi-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    font-size: 1.5rem;
+}
+
+.bg-soft-rose {
+    background-color: var(--primary-rose-light);
+    color: var(--text-noviazgo);
+}
+
+.bg-soft-beige {
+    background-color: #FDF0E6;
+    color: var(--text-compromiso);
+}
+
+.bg-soft-green {
+    background-color: #E2F0D9;
+    color: var(--text-matrimonio);
+}
+
+.progress {
+    background-color: rgba(78, 138, 109, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.bg-success-pastel {
+    background-color: var(--text-matrimonio) !important;
+}
+
+.chart-card {
+    border-radius: 20px;
+    background-color: #ffffff;
+    border: 1px solid rgba(212, 163, 174, 0.08);
+}
+
+.chart-container {
+    margin-top: 1rem;
+    min-height: 250px;
+}
+
+.summary-list .text-muted {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.summary-list strong {
+    font-size: 1rem;
+}
+
+/* Quick Qty Adjustment Buttons */
+.btn-qty-minus, .btn-qty-plus {
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    background-color: #ffffff;
+    border-radius: 6px;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-qty-minus:hover {
+    background-color: #FFF0F2;
+    border-color: var(--primary-rose);
+    color: var(--primary-rose);
+}
+
+.btn-qty-plus:hover {
+    background-color: #EBF7F2;
+    border-color: var(--text-matrimonio);
+    color: var(--text-matrimonio);
+}
+
+.item-qty-display {
+    min-width: 25px;
+    display: inline-block;
+    text-align: center;
+}
+
+
