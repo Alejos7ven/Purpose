@@ -28,7 +28,7 @@ $baseUrl = '/proposito';
                     <div class="logo-area mb-3">
                         <i class="bi bi-heart-fill heart-logo"></i>
                     </div>
-                    <h1 class="brand-title">MarryStock</h1>
+                    <h1 class="brand-title">Purpose</h1>
                     <p class="brand-subtitle mb-4">Nuestro proyecto de vida juntos</p>
                     
                     <form id="loginForm" novalidate>

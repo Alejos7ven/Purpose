@@ -26,7 +26,7 @@ $baseUrl = '/proposito';
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="<?php echo $baseUrl; ?>/dashboard">
                 <i class="bi bi-heart-fill brand-icon me-2"></i>
-                <span class="brand-text">MarryStock</span>
+                <span class="brand-text">Purpose</span>
             </a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
