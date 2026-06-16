@@ -52,7 +52,7 @@ $baseUrl = '/proposito';
                     </form>
                     
                     <div class="footer-note mt-4">
-                        <p class="text-muted small">&copy; <?php echo date('Y'); ?> Con Amor. Jose De Marzo. Dedicado al amor de mi vida. Marlys Silva</p>
+                        <p class="text-muted small">&copy; <?php echo date('Y'); ?> Con Amor. Jose De Marzo. Dedicado al amor de mi vida. Marlys Silva.</p>
                     </div>
                 </div>
             </div>
