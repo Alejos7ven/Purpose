@@ -1,6 +1,7 @@
 <?php
 require_once dirname(__DIR__) . '/models/ProyectoVida.php';
 require_once dirname(__DIR__) . '/models/Usuario.php';
+require_once dirname(__DIR__) . '/helpers/ImageCompressor.php';
 
 class ProyectoController {
     private ?PDO $db;
@@ -122,9 +123,14 @@ class ProyectoController {
         // Manejar subida de foto
         $fotoPath = null;
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+            $error = ImageCompressor::validar($_FILES['foto'], 10);
+            if ($error !== null) {
+                echo json_encode(['status' => 'error', 'message' => $error]);
+                return;
+            }
             $fotoPath = $this->guardarFoto($_FILES['foto']);
             if ($fotoPath === null) {
-                echo json_encode(['status' => 'error', 'message' => 'La imagen subida no es válida. Debe ser JPG, PNG o GIF menor a 2MB.']);
+                echo json_encode(['status' => 'error', 'message' => 'No se pudo procesar la imagen. Intenta con otro archivo.']);
                 return;
             }
         }
@@ -204,9 +210,14 @@ class ProyectoController {
 
         // Manejar subida de foto si se sube una nueva
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+            $error = ImageCompressor::validar($_FILES['foto'], 10);
+            if ($error !== null) {
+                echo json_encode(['status' => 'error', 'message' => $error]);
+                return;
+            }
             $fotoPath = $this->guardarFoto($_FILES['foto']);
             if ($fotoPath === null) {
-                echo json_encode(['status' => 'error', 'message' => 'La imagen subida no es válida. Debe ser JPG, PNG o GIF menor a 2MB.']);
+                echo json_encode(['status' => 'error', 'message' => 'No se pudo procesar la imagen. Intenta con otro archivo.']);
                 return;
             }
             $data['foto'] = $fotoPath;
@@ -231,34 +242,24 @@ class ProyectoController {
     }
 
     /**
-     * Guarda y valida la foto subida.
+     * Guarda, comprime y convierte la foto del proyecto a JPEG.
+     * Intenta comprimir con GD; si falla, guarda el original.
      */
     private function guardarFoto(array $file): ?string {
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        $maxSize = 2 * 1024 * 1024; // 2MB
-
-        if (!in_array($file['type'], $allowedTypes)) {
-            return null;
-        }
-
-        if ($file['size'] > $maxSize) {
-            return null;
-        }
-
-        // Crear directorio de uploads en la vista
         $uploadDir = dirname(__DIR__) . '/view/uploads/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
 
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $fileName = uniqid('proyecto_') . '.' . $extension;
-        $destination = $uploadDir . $fileName;
+        $fileName = ImageCompressor::comprimir(
+            $file['tmp_name'], $uploadDir, 'proyecto_', 900, 82
+        );
+        if ($fileName !== null) return 'uploads/' . $fileName;
 
-        if (move_uploaded_file($file['tmp_name'], $destination)) {
-            return 'uploads/' . $fileName; // Ruta relativa para guardar en la BD y servir desde la vista
-        }
-
-        return null;
+        // Fallback
+        error_log('ImageCompressor[proyecto] falló - guardando original.');
+        $info = @getimagesize($file['tmp_name']);
+        if (!$info) return null;
+        $ext = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'][$info['mime']] ?? 'jpg';
+        $name = uniqid('proyecto_') . '.' . $ext;
+        return move_uploaded_file($file['tmp_name'], $uploadDir . $name) ? 'uploads/' . $name : null;
     }
 }

@@ -1,0 +1,30 @@
+/* ==========================================================================
+   FEED PAGE - Estilos específicos para la página del Muro de Parejas
+   ========================================================================== */
+
+/* Enlace de navegación activo en el menú */
+.nav-page-link {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-muted) !important;
+    border-radius: 50px;
+    padding: 0.4rem 1rem !important;
+    transition: all 0.2s ease;
+}
+
+.nav-page-link:hover {
+    color: var(--primary-rose-hover) !important;
+    background-color: var(--primary-rose-light);
+}
+
+.nav-page-link.active {
+    color: var(--text-dark) !important;
+    background-color: var(--primary-rose-light);
+}
+
+/* Cabecera de la página del feed */
+.feed-page-header {
+    padding-top: 0.5rem;
+}
+
+/* ========================================================================== */

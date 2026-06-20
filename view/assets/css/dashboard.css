@@ -71,6 +71,26 @@ body {
     border-color: var(--primary-rose);
 }
 
+/* Nav page links (Dashboard / Muro) */
+.nav-page-link {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-muted) !important;
+    border-radius: 50px;
+    padding: 0.4rem 1rem !important;
+    transition: all 0.2s ease;
+}
+
+.nav-page-link:hover {
+    color: var(--primary-rose-hover) !important;
+    background-color: var(--primary-rose-light);
+}
+
+.nav-page-link.active {
+    color: var(--text-dark) !important;
+    background-color: var(--primary-rose-light);
+}
+
 /* Loading Spinner */
 .text-rose {
     color: var(--primary-rose) !important;
@@ -623,5 +643,333 @@ body {
     display: inline-block;
     text-align: center;
 }
+
+/* Profile Avatar Upload Container */
+.profile-avatar-container {
+    position: relative;
+    border-radius: 50%;
+    overflow: visible;
+}
+.profile-avatar-container img {
+    object-fit: cover;
+    border: 2px solid var(--primary-rose) !important;
+}
+.profile-avatar-container label {
+    transition: all 0.2s ease-in-out;
+}
+.profile-avatar-container label:hover {
+    background-color: var(--primary-rose) !important;
+    color: white !important;
+    transform: scale(1.1);
+}
+
+/* Navbar user pill avatar */
+#navUserAvatar {
+    transition: transform 0.2s ease;
+}
+#btnOpenPerfil:hover #navUserAvatar {
+    transform: scale(1.1);
+}
+
+/* Pastel Buttons for Admin Solicitudes */
+.btn-success-pastel {
+    background-color: #E2F0D9 !important;
+    border: 1px solid #C5E0B4 !important;
+    color: #385723 !important;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.btn-success-pastel:hover {
+    background-color: #C5E0B4 !important;
+    color: #385723 !important;
+    transform: translateY(-1px);
+}
+
+.btn-danger-pastel {
+    background-color: #FFF0F2 !important;
+    border: 1px solid #F8D7DA !important;
+    color: #842029 !important;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.btn-danger-pastel:hover {
+    background-color: #F8D7DA !important;
+    color: #842029 !important;
+    transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   FEED MODULO - RED SOCIAL PARA PAREJAS
+   ========================================================================== */
+
+.feed-creator-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.post-input {
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    resize: none;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.post-input:focus {
+    border-color: var(--primary-rose) !important;
+    box-shadow: 0 0 0 3px rgba(212, 163, 174, 0.2) !important;
+}
+
+.btn-upload-photo {
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-upload-photo:hover {
+    background-color: var(--bg-pink-light);
+    color: var(--primary-rose-hover) !important;
+    transform: translateY(-1px);
+}
+
+.feed-post-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 24px;
+    transition: box-shadow 0.2s ease;
+}
+
+.feed-post-card:hover {
+    box-shadow: 0 8px 24px rgba(212, 163, 174, 0.08) !important;
+}
+
+.feed-post-avatar {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border: 2px solid var(--primary-rose-light);
+}
+
+.feed-post-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.feed-post-time {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.feed-post-content {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-dark);
+}
+
+.feed-post-img {
+    border-radius: 12px;
+    max-height: 450px;
+    object-fit: cover;
+    width: 100%;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.feed-post-img:hover {
+    opacity: 0.95;
+}
+
+/* Reactions and Comments Actions */
+.feed-post-actions {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 6px 0;
+}
+
+.btn-feed-action {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-feed-action:hover {
+    background-color: var(--primary-rose-light);
+    color: var(--primary-rose-hover);
+}
+
+.btn-feed-action.active {
+    color: var(--primary-rose);
+}
+
+/* Floating Reactions Tray */
+.reactions-container {
+    position: relative;
+    display: inline-block;
+}
+
+.reactions-tray {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: #ffffff;
+    border-radius: 30px;
+    padding: 6px 12px;
+    box-shadow: 0 8px 24px rgba(92, 65, 70, 0.15);
+    border: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    z-index: 1000;
+}
+
+.reactions-container:hover .reactions-tray,
+.reactions-tray.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-8px);
+}
+
+.reaction-emoji-btn {
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.reaction-emoji-btn:hover {
+    transform: scale(1.35) translateY(-2px);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* Shared post card container */
+.shared-post-container {
+    border-left: 3px solid var(--primary-rose);
+    background-color: var(--bg-pink-light);
+    border-radius: 0 12px 12px 0;
+}
+
+.shared-post-container .feed-post-avatar {
+    width: 36px;
+    height: 36px;
+}
+
+/* Reactions count display */
+.reactions-summary {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.reaction-badge {
+    background-color: var(--primary-rose-light);
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    padding: 2px 8px;
+    margin-right: 4px;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Comments Section styling */
+.comments-section {
+    background-color: var(--bg-main);
+    border-radius: 0 0 20px 20px;
+    margin: 0 -1.5rem -1.5rem -1.5rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.comment-avatar {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.comment-bubble {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 8px 14px;
+    position: relative;
+}
+
+.comment-author-name {
+    font-weight: 700;
+    color: var(--text-dark);
+    font-size: 0.85rem;
+}
+
+.comment-author-sub {
+    font-weight: 500;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.comment-text {
+    font-size: 0.85rem;
+    color: var(--text-dark);
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+.comment-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.comment-input-area {
+    display: flex;
+    gap: 10px;
+}
+
+.comment-form-control {
+    border-radius: 20px !important;
+    border: 1px solid var(--border-color) !important;
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
+    transition: all 0.2s ease;
+}
+
+.comment-form-control:focus {
+    border-color: var(--primary-rose) !important;
+    box-shadow: 0 0 0 3px rgba(212, 163, 174, 0.2) !important;
+}
+
+.btn-comment-submit {
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.btn-delete-post, .btn-delete-comment {
+    color: var(--text-muted);
+    transition: color 0.15s ease;
+    cursor: pointer;
+}
+
+.btn-delete-post:hover, .btn-delete-comment:hover {
+    color: #dc3545;
+}
+
 
 

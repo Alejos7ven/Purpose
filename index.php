@@ -9,6 +9,8 @@ require_once __DIR__ . '/controllers/AuthController.php';
 require_once __DIR__ . '/controllers/ProyectoController.php';
 require_once __DIR__ . '/controllers/InventarioController.php';
 require_once __DIR__ . '/controllers/NecesidadController.php';
+require_once __DIR__ . '/controllers/FeedController.php';
+
 
 // Inicializar base de datos
 $dbClass = new Database();
@@ -33,6 +35,9 @@ try {
         if ($routePath === '/api/login') {
             $controller = new AuthController($db);
             $controller->login();
+        } elseif ($routePath === '/api/registrarse') {
+            $controller = new AuthController($db);
+            $controller->registrarse();
         } else {
             // Si no está autenticado y pide API, retornar error JSON
             if (str_starts_with($routePath, '/api/')) {
@@ -53,6 +58,10 @@ try {
         case '/':
         case '/dashboard':
             require_once __DIR__ . '/view/dashboard.php';
+            break;
+
+        case '/feed':
+            require_once __DIR__ . '/view/feed.php';
             break;
 
         // API Autenticación
@@ -142,6 +151,70 @@ try {
         case '/api/necesidades/eliminar':
             $controller = new NecesidadController($db);
             $controller->eliminar();
+            break;
+
+        // API Feed de Parejas
+        case '/api/feed':
+            $controller = new FeedController($db);
+            $controller->listar();
+            break;
+
+        case '/api/feed/crear':
+            $controller = new FeedController($db);
+            $controller->crear();
+            break;
+
+        case '/api/feed/compartir':
+            $controller = new FeedController($db);
+            $controller->compartir();
+            break;
+
+        case '/api/feed/eliminar':
+            $controller = new FeedController($db);
+            $controller->eliminar();
+            break;
+
+        case '/api/feed/comentar':
+            $controller = new FeedController($db);
+            $controller->comentar();
+            break;
+
+        case '/api/feed/comentario/eliminar':
+            $controller = new FeedController($db);
+            $controller->eliminarComentario();
+            break;
+
+        case '/api/feed/reaccionar':
+            $controller = new FeedController($db);
+            $controller->reaccionar();
+            break;
+
+        // API Perfil Individual
+
+        case '/api/perfil':
+            $controller = new AuthController($db);
+            $controller->obtenerPerfil();
+            break;
+
+        case '/api/perfil/actualizar':
+            $controller = new AuthController($db);
+            $controller->actualizarPerfil();
+            break;
+
+        case '/api/perfil/cambiar_password':
+            $controller = new AuthController($db);
+            $controller->cambiarPassword();
+            break;
+
+        // API Admin (Aprobación de Cuentas)
+        case '/api/admin/solicitudes':
+            $controller = new AuthController($db);
+            $controller->listarSolicitudes();
+            break;
+
+        case '/api/admin/solicitudes/procesar':
+            $controller = new AuthController($db);
+            $controller->procesarSolicitud();
             break;
 
         default:

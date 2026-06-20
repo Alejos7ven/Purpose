@@ -8,6 +8,7 @@ $(document).ready(function() {
     // Inicialización
     cargarProyecto();
     cargarParejasDisponibles();
+    cargarPerfilNavbar();
 
     // ==================== LOGOUT ====================
     $('#btnLogout').on('click', function() {
@@ -57,6 +58,7 @@ $(document).ready(function() {
                     // Cargar inventario y necesidades
                     cargarInventario();
                     cargarNecesidades();
+
                 } else {
                     $('#noProjectContainer').removeClass('d-none');
                 }
@@ -1329,4 +1331,954 @@ $(document).ready(function() {
             .replace(/[^a-z0-9]/g, '');
         return 'badge-cat-' + normalized;
     }
+
+    // ==================== PROFILE MANAGEMENT & ADMIN SOLICITUDES ====================
+
+    function cargarPerfilNavbar() {
+        $.ajax({
+            url: BASE_URL + '/api/perfil',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success' && response.data) {
+                    const user = response.data;
+                    $('#navUserName').text(user.nombre);
+                    if (user.foto) {
+                        $('#navUserAvatar').attr('src', BASE_URL + '/view/' + user.foto);
+                    } else {
+                        $('#navUserAvatar').attr('src', "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D4A3AE'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>");
+                    }
+                }
+            }
+        });
+    }
+
+    // Abrir modal de perfil
+    $('#btnOpenPerfil').on('click', function() {
+        // Cargar datos actuales
+        $.ajax({
+            url: BASE_URL + '/api/perfil',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success' && response.data) {
+                    const user = response.data;
+                    $('#profileNombre').val(user.nombre);
+                    $('#profileApellido').val(user.apellido || '');
+                    $('#profileTlf').val(user.tlf || '');
+                    $('#profileEmail').val(user.email);
+                    
+                    if (user.foto) {
+                        $('#profileAvatarPreview').attr('src', BASE_URL + '/view/' + user.foto);
+                    } else {
+                        $('#profileAvatarPreview').attr('src', "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D4A3AE'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>");
+                    }
+                    
+                    // Resetear pestaña y form de contraseña
+                    $('#profile-datos-tab').tab('show');
+                    $('#profilePassForm')[0].reset();
+                    
+                    $('#perfilModal').modal('show');
+                } else {
+                    Swal.fire('Error', 'No se pudieron cargar los datos de tu perfil.', 'error');
+                }
+            },
+            error: function() {
+                Swal.fire('Error', 'Error de red al cargar el perfil.', 'error');
+            }
+        });
+    });
+
+    // Vista previa de la foto seleccionada
+    $('#profileFoto').on('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Validar tipo y tamaño antes de previsualizar
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                Swal.fire('Tipo no permitido', 'Por favor selecciona una imagen JPG, PNG, GIF o WEBP.', 'warning');
+                $(this).val('');
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                Swal.fire('Archivo muy grande', 'La imagen no debe pesar más de 10MB.', 'warning');
+                $(this).val('');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#profileAvatarPreview').attr('src', e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Guardar cambios datos personales
+    $('#profileDatosForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const nombre = $('#profileNombre').val().trim();
+        if (nombre === '') {
+            Swal.fire('Campo requerido', 'El nombre es obligatorio.', 'warning');
+            return;
+        }
+
+        const formData = new FormData(this);
+        const $submitBtn = $(this).find('button[type="submit"]');
+        const originalText = $submitBtn.text();
+        $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Guardando...');
+
+        $.ajax({
+            url: BASE_URL + '/api/perfil/actualizar',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function(response) {
+                $submitBtn.prop('disabled', false).text(originalText);
+                if (response.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Perfil Actualizado',
+                        text: response.message,
+                        timer: 1550,
+                        showConfirmButton: false
+                    });
+                    
+                    // Actualizar en el navbar
+                    $('#navUserName').text(response.data.nombre);
+                    if (response.data.foto) {
+                        $('#navUserAvatar').attr('src', BASE_URL + '/view/' + response.data.foto);
+                    }
+                    
+                    // Limpiar input file
+                    $('#profileFoto').val('');
+                    
+                    // Actualizar creador_nombre en el proyecto si coincide
+                    cargarProyecto();
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                $submitBtn.prop('disabled', false).text(originalText);
+                let msg = 'No se pudo guardar la información del perfil.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    msg = xhr.responseJSON.message;
+                }
+                Swal.fire('Error', msg, 'error');
+            }
+        });
+    });
+
+    // Guardar cambios contraseña
+    $('#profilePassForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const currentPass = $('#profileCurrentPass').val();
+        const newPass = $('#profileNewPass').val();
+        const confirmPass = $('#profileConfirmPass').val();
+
+        if (currentPass === '' || newPass === '' || confirmPass === '') {
+            Swal.fire('Campos requeridos', 'Todos los campos son obligatorios.', 'warning');
+            return;
+        }
+
+        if (newPass !== confirmPass) {
+            Swal.fire('Contraseñas no coinciden', 'La nueva contraseña y su confirmación no coinciden.', 'warning');
+            return;
+        }
+
+        if (newPass.length < 6) {
+            Swal.fire('Contraseña corta', 'La nueva contraseña debe tener al menos 6 caracteres.', 'warning');
+            return;
+        }
+
+        const $submitBtn = $(this).find('button[type="submit"]');
+        const originalText = $submitBtn.text();
+        $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Actualizando...');
+
+        $.ajax({
+            url: BASE_URL + '/api/perfil/cambiar_password',
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(response) {
+                $submitBtn.prop('disabled', false).text(originalText);
+                if (response.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Contraseña Actualizada',
+                        text: response.message,
+                        timer: 1550,
+                        showConfirmButton: false
+                    }).then(() => {
+                        $('#perfilModal').modal('hide');
+                    });
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                $submitBtn.prop('disabled', false).text(originalText);
+                let msg = 'No se pudo cambiar la contraseña.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    msg = xhr.responseJSON.message;
+                }
+                Swal.fire('Error', msg, 'error');
+            }
+        });
+    });
+
+    // ==================== ADMIN PANEL FOR REGISTRATION APPROVALS ====================
+    if ($('#profile-admin-tab').length > 0) {
+        // Cargar solicitudes cuando se entra al tab de admin
+        $('#profile-admin-tab').on('shown.bs.tab', function () {
+            cargarSolicitudesPendientes();
+        });
+
+        $('#btnRefreshSolicitudes').on('click', function() {
+            cargarSolicitudesPendientes();
+        });
+
+        function cargarSolicitudesPendientes() {
+            const $body = $('#adminSolicitudesBody');
+            $body.html('<tr><td colspan="3" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2 text-rose"></span>Cargando solicitudes...</td></tr>');
+            $('#noSolicitudesAlert').addClass('d-none');
+            $('#tableSolicitudes').removeClass('d-none');
+
+            $.ajax({
+                url: BASE_URL + '/api/admin/solicitudes',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        const items = response.data || [];
+                        if (items.length === 0) {
+                            $body.empty();
+                            $('#tableSolicitudes').addClass('d-none');
+                            $('#noSolicitudesAlert').removeClass('d-none');
+                            return;
+                        }
+
+                        let html = '';
+                        items.forEach(function(item) {
+                            const dateStr = formatearFechaHumana(item.created_at);
+                            const tlf = item.tlf ? item.tlf : 'No especificado';
+                            const apellido = item.apellido ? item.apellido : '';
+                            const fullNombre = `${item.nombre} ${apellido}`.trim();
+                            
+                            html += `
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-dark">${escapeHtml(fullNombre)}</div>
+                                        <div class="text-muted small" style="font-size: 0.8rem;">${escapeHtml(item.email)}</div>
+                                        <div class="text-muted small" style="font-size: 0.75rem;"><i class="bi bi-telephone me-1"></i>${escapeHtml(tlf)}</div>
+                                    </td>
+                                    <td>
+                                        <div class="bg-light p-2 rounded text-muted" style="white-space: pre-wrap; font-size: 0.78rem; line-height: 1.3; max-width: 250px;">${escapeHtml(item.mensaje_registro || 'Sin mensaje')}</div>
+                                        <div class="text-muted mt-1" style="font-size: 0.7rem;"><i class="bi bi-calendar-event me-1"></i>${dateStr}</div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex gap-1.5 justify-content-end">
+                                            <button class="btn btn-sm btn-success-pastel text-dark btn-aprobar-solicitud px-2 py-1" data-id="${item.id}" data-name="${escapeHtml(item.nombre)}" title="Aprobar">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger-pastel text-dark btn-rechazar-solicitud px-2 py-1" data-id="${item.id}" data-name="${escapeHtml(item.nombre)}" title="Rechazar">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        $body.html(html);
+                    } else {
+                        $body.html('<tr><td colspan="3" class="text-center text-danger py-4">Error al cargar las solicitudes.</td></tr>');
+                    }
+                },
+                error: function() {
+                    $body.html('<tr><td colspan="3" class="text-center text-danger py-4">Error de conexión al cargar solicitudes.</td></tr>');
+                }
+            });
+        }
+
+        // Acciones de Aprobación / Rechazo
+        $(document).on('click', '.btn-aprobar-solicitud', function() {
+            const id = $(this).data('id');
+            const nombre = $(this).data('name');
+            procesarSolicitudAdmin(id, nombre, 'aprobar');
+        });
+
+        $(document).on('click', '.btn-rechazar-solicitud', function() {
+            const id = $(this).data('id');
+            const nombre = $(this).data('name');
+            procesarSolicitudAdmin(id, nombre, 'rechazar');
+        });
+
+        function procesarSolicitudAdmin(id, nombre, accion) {
+            const titulo = accion === 'aprobar' ? '¿Aprobar solicitud?' : '¿Rechazar solicitud?';
+            const texto = accion === 'aprobar' 
+                ? `El usuario ${nombre} podrá acceder al sistema con su correo y contraseña.` 
+                : `Se denegará el acceso al usuario ${nombre}.`;
+            const confirmColor = accion === 'aprobar' ? '#A8E6CF' : '#FFD3B6';
+            const actionText = accion === 'aprobar' ? 'Aprobar' : 'Rechazar';
+
+            Swal.fire({
+                title: titulo,
+                text: texto,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: confirmColor,
+                cancelButtonColor: '#EBEBEB',
+                confirmButtonText: `Sí, ${actionText}`,
+                cancelButtonText: 'Cancelar',
+                customClass: {
+                    confirmButton: 'text-dark fw-bold'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.showLoading();
+                    $.ajax({
+                        url: BASE_URL + '/api/admin/solicitudes/procesar',
+                        type: 'POST',
+                        data: {
+                            id: id,
+                            accion: accion
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: response.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                                cargarSolicitudesPendientes();
+                                // También refrescar el listado de parejas por si ahora está disponible para asignar
+                                if (typeof cargarParejasDisponibles === 'function') {
+                                    cargarParejasDisponibles();
+                                }
+                            } else {
+                                Swal.fire('Error', response.message, 'error');
+                            }
+                        },
+                        error: function() {
+                            Swal.fire('Error', 'No se pudo completar la operación en el servidor.', 'error');
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    // ==========================================================================
+    // FEED DE PAREJAS (RED SOCIAL) - FUNCIONALIDAD COMPLETA
+    // ==========================================================================
+    let feedPosts = [];
+    let proyectoActualId = null;
+
+    function cargarFeed() {
+        $.ajax({
+            url: BASE_URL + '/api/feed',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    feedPosts = response.data;
+                    proyectoActualId = response.proyecto_actual_id;
+                    renderFeed(feedPosts);
+                } else {
+                    $('#globalFeedContainer').html(`
+                        <div class="alert alert-warning border-0 shadow-sm text-center p-4">
+                            <i class="bi bi-exclamation-triangle-fill text-warning fs-3 mb-2"></i>
+                            <p class="mb-0">${escapeHtml(response.message || 'No se pudieron cargar las publicaciones.')}</p>
+                        </div>
+                    `);
+                }
+            },
+            error: function() {
+                $('#globalFeedContainer').html(`
+                    <div class="alert alert-danger border-0 shadow-sm text-center p-4">
+                        <i class="bi bi-x-circle-fill text-danger fs-3 mb-2"></i>
+                        <p class="mb-0">Error de conexión al cargar el feed.</p>
+                    </div>
+                `);
+            }
+        });
+    }
+
+    function renderFeed(posts) {
+        const $container = $('#globalFeedContainer');
+        $container.empty();
+
+        if (posts.length === 0) {
+            $container.html(`
+                <div class="text-center py-5 bg-white rounded-4 border p-4 shadow-sm">
+                    <i class="bi bi-postcard-heart text-muted" style="font-size: 3rem; opacity: 0.5;"></i>
+                    <h5 class="mt-3 font-heading text-dark">El muro está vacío</h5>
+                    <p class="text-muted small">Sé el primero en compartir un estado o foto de su historia de amor.</p>
+                </div>
+            `);
+            return;
+        }
+
+        posts.forEach(post => {
+            const esMio = parseInt(post.proyecto_vida_id) === parseInt(proyectoActualId);
+            const tieneFoto = post.foto ? true : false;
+            const tieneShared = post.shared_post_id ? true : false;
+
+            // Foto de perfil de pareja
+            const avatarUrl = post.proyecto_foto 
+                ? (BASE_URL + '/view/' + post.proyecto_foto) 
+                : `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D4A3AE'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>`;
+
+            // Nombre de pareja
+            const nombresPareja = post.pareja_nombre ? `${post.creador_nombre} & ${post.pareja_nombre}` : post.creador_nombre;
+            const tituloPerfil = `${escapeHtml(post.proyecto_nombre)} <span class="text-muted fs-6 font-body">(${escapeHtml(nombresPareja)})</span>`;
+
+            // Botón de eliminar si es mío
+            const deleteDropdown = esMio 
+                ? `<div class="dropdown ms-auto">
+                       <button class="btn btn-link text-muted p-1 border-0 shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                           <i class="bi bi-three-dots-vertical"></i>
+                       </button>
+                       <ul class="dropdown-menu dropdown-menu-end border shadow-sm" style="z-index: 1050;">
+                           <li>
+                               <a class="dropdown-item text-danger btn-delete-post" href="#" data-id="${post.id}">
+                                   <i class="bi bi-trash-fill me-2"></i>Eliminar Publicación
+                               </a>
+                           </li>
+                       </ul>
+                   </div>`
+                : '';
+
+            // Renderizar contenido de la publicación
+            const contentHtml = post.contenido ? `<p class="feed-post-content mb-3">${escapeHtml(post.contenido)}</p>` : '';
+            const imgHtml = tieneFoto 
+                ? `<div class="mb-3 text-center">
+                       <img src="${BASE_URL}/view/${escapeHtml(post.foto)}" class="img-fluid feed-post-img rounded shadow-sm">
+                   </div>` 
+                : '';
+
+            // Renderizar publicación compartida
+            let sharedHtml = '';
+            if (tieneShared) {
+                if (post.shared_contenido !== null) {
+                    const sharedAvatarUrl = post.shared_proyecto_foto 
+                        ? (BASE_URL + '/view/' + post.shared_proyecto_foto) 
+                        : `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D4A3AE'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>`;
+
+                    const sharedImgHtml = post.shared_foto 
+                        ? `<div class="mt-2 text-center">
+                               <img src="${BASE_URL}/view/${escapeHtml(post.shared_foto)}" class="img-fluid rounded" style="max-height: 250px; object-fit: cover; width: 100%;">
+                           </div>` 
+                        : '';
+
+                    sharedHtml = `
+                        <div class="shared-post-container border rounded p-3 mb-3 bg-light">
+                            <div class="d-flex align-items-center mb-2">
+                                <img src="${sharedAvatarUrl}" class="rounded-circle feed-post-avatar me-2" alt="Avatar Compartido" style="width: 32px; height: 32px;">
+                                <div>
+                                    <h6 class="mb-0 small fw-bold text-dark font-heading">${escapeHtml(post.shared_proyecto_nombre)}</h6>
+                                    <span class="text-muted small" style="font-size: 0.75rem;">${calcularTiempoHace(post.shared_created_at)}</span>
+                                </div>
+                            </div>
+                            <p class="mb-0 text-muted small">${escapeHtml(post.shared_contenido)}</p>
+                            ${sharedImgHtml}
+                        </div>
+                    `;
+                } else {
+                    sharedHtml = `
+                        <div class="alert alert-light border rounded small text-muted p-3 mb-3">
+                            <i class="bi bi-info-circle me-1.5"></i>Esta publicación compartida ya no está disponible.
+                        </div>
+                    `;
+                }
+            }
+
+            // Summary of reactions and comments
+            const totalReacciones = parseInt(post.reacciones.total_general) || 0;
+            const totalComentarios = post.comentarios.length || 0;
+
+            let reacsSummaryHtml = '';
+            if (totalReacciones > 0) {
+                let badges = '';
+                const types = post.reacciones.totales;
+                for (const type in types) {
+                    badges += `${obtenerEmojiReaccion(type)} `;
+                }
+                reacsSummaryHtml = `
+                    <div class="reactions-summary d-flex align-items-center py-2 px-3">
+                        <span class="me-1">${badges}</span>
+                        <span class="fw-semibold text-rose">${totalReacciones} ${totalReacciones === 1 ? 'reacción' : 'reacciones'}</span>
+                        <span class="ms-auto">${totalComentarios} ${totalComentarios === 1 ? 'comentario' : 'comentarios'}</span>
+                    </div>
+                `;
+            } else {
+                reacsSummaryHtml = `
+                    <div class="reactions-summary d-flex align-items-center py-2 px-3 text-muted" style="font-size:0.75rem;">
+                        <span>Sé el primero en reaccionar</span>
+                        <span class="ms-auto">${totalComentarios} ${totalComentarios === 1 ? 'comentario' : 'comentarios'}</span>
+                    </div>
+                `;
+            }
+
+            // Reacción actual
+            const reacAct = post.reaccion_actual;
+            const reacActClase = reacAct ? 'active' : '';
+            const reacActNombre = reacAct ? obtenerNombreReaccion(reacAct) : 'Reaccionar';
+            const reacActEmoji = reacAct ? obtenerEmojiReaccion(reacAct) : '<i class="bi bi-heart me-1.5"></i>';
+            const reacActColor = reacAct ? obtenerColorReaccion(reacAct) : 'inherit';
+
+            // Comentarios HTML
+            let commentsListHtml = '';
+            if (post.comentarios && post.comentarios.length > 0) {
+                post.comentarios.forEach(com => {
+                    const comEsMio = parseInt(com.proyecto_vida_id) === parseInt(proyectoActualId);
+                    const deleteComBtn = comEsMio 
+                        ? `<i class="bi bi-trash btn-delete-comment ms-2" data-id="${com.id}" title="Eliminar comentario"></i>`
+                        : '';
+                    const comAvatar = com.proyecto_foto 
+                        ? (BASE_URL + '/view/' + com.proyecto_foto) 
+                        : `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D4A3AE'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>`;
+
+                    commentsListHtml += `
+                        <div class="comment-item d-flex align-items-start mb-3" data-id="${com.id}">
+                            <img src="${comAvatar}" class="rounded-circle comment-avatar me-2" alt="Avatar" style="width: 32px; height: 32px;">
+                            <div class="flex-grow-1">
+                                <div class="comment-bubble">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div>
+                                            <span class="comment-author-name">${escapeHtml(com.proyecto_nombre)}</span>
+                                            <span class="comment-author-sub">(${escapeHtml(com.autor_nombre)})</span>
+                                        </div>
+                                        ${deleteComBtn}
+                                    </div>
+                                    <p class="comment-text">${escapeHtml(com.contenido)}</p>
+                                </div>
+                                <span class="comment-time ms-2">${calcularTiempoHace(com.created_at)}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            const postCard = `
+                <div class="card feed-post-card shadow-sm border-0" data-id="${post.id}">
+                    <div class="card-body p-4 pb-3">
+                        <!-- Post Header -->
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="${avatarUrl}" class="rounded-circle feed-post-avatar me-3" alt="Avatar de Pareja">
+                            <div>
+                                <h5 class="mb-0 feed-post-title fs-6">${tituloPerfil}</h5>
+                                <span class="feed-post-time">${calcularTiempoHace(post.created_at)}</span>
+                            </div>
+                            ${deleteDropdown}
+                        </div>
+
+                        <!-- Post Body Content -->
+                        ${contentHtml}
+                        ${imgHtml}
+                        ${sharedHtml}
+
+                        <!-- Summary rows -->
+                        ${reacsSummaryHtml}
+
+                        <!-- Action buttons -->
+                        <div class="feed-post-actions d-flex justify-content-around align-items-center">
+                            <div class="reactions-container">
+                                <div class="reactions-tray border shadow-sm rounded-pill bg-white">
+                                    <button type="button" class="reaction-emoji-btn" data-id="${post.id}" data-type="me_gusta" title="Me gusta">👍</button>
+                                    <button type="button" class="reaction-emoji-btn" data-id="${post.id}" data-type="me_encanta" title="Me encanta">❤️</button>
+                                    <button type="button" class="reaction-emoji-btn" data-id="${post.id}" data-type="me_divierte" title="Me divierte">😆</button>
+                                    <button type="button" class="reaction-emoji-btn" data-id="${post.id}" data-type="me_asombra" title="Me asombra">😮</button>
+                                    <button type="button" class="reaction-emoji-btn" data-id="${post.id}" data-type="me_entristece" title="Me entristece">😢</button>
+                                    <button type="button" class="reaction-emoji-btn" data-id="${post.id}" data-type="me_enoja" title="Me enoja">😡</button>
+                                </div>
+                                <button type="button" class="btn btn-feed-action btn-reaction-toggle ${reacActClase}" data-id="${post.id}" style="color: ${reacActColor};">
+                                    ${reacActEmoji} <span class="d-none d-sm-inline">${reacActNombre}</span>
+                                </button>
+                            </div>
+
+                            <button type="button" class="btn btn-feed-action btn-comment-focus" data-id="${post.id}">
+                                <i class="bi bi-chat-left text-muted me-1.5"></i> <span class="d-none d-sm-inline">Comentar</span>
+                            </button>
+
+                            <button type="button" class="btn btn-feed-action btn-share-post" data-id="${post.id}" data-project="${escapeHtml(post.proyecto_nombre)}" data-content="${escapeHtml(post.contenido || '')}" data-img="${post.foto ? `${BASE_URL}/view/${post.foto}` : ''}" data-avatar="${post.proyecto_foto ? `${BASE_URL}/view/${post.proyecto_foto}` : ''}" data-date="${calcularTiempoHace(post.created_at)}">
+                                <i class="bi bi-share text-muted me-1.5"></i> <span class="d-none d-sm-inline">Compartir</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="comments-section">
+                        <div class="comments-list-container mb-3" id="comments-list-${post.id}">
+                            ${commentsListHtml}
+                        </div>
+                        
+                        <!-- Comment Form -->
+                        <form class="comment-form" data-id="${post.id}">
+                            <div class="comment-input-area">
+                                <input type="text" class="form-control comment-form-control flex-grow-1" placeholder="Escribe un comentario..." name="contenido" required>
+                                <button type="submit" class="btn btn-primary-custom btn-comment-submit shadow-none">
+                                    <i class="bi bi-send-fill text-white" style="font-size:0.9rem;"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            $container.append(postCard);
+        });
+    }
+
+    function calcularTiempoHace(dateStr) {
+        if (!dateStr) return '';
+        const date = new Date(dateStr.replace(/-/g, '/'));
+        const now = new Date();
+        const diffMs = now - date;
+        const diffSec = Math.floor(diffMs / 1000);
+        const diffMin = Math.floor(diffSec / 60);
+        const diffHr = Math.floor(diffMin / 60);
+        const diffDays = Math.floor(diffHr / 24);
+
+        if (diffSec < 60) return 'Hace un momento';
+        if (diffMin < 60) return `Hace ${diffMin} min`;
+        if (diffHr < 24) return `Hace ${diffHr} ${diffHr === 1 ? 'hora' : 'horas'}`;
+        if (diffDays < 7) return `Hace ${diffDays} ${diffDays === 1 ? 'día' : 'días'}`;
+        
+        return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function obtenerEmojiReaccion(tipo) {
+        switch(tipo) {
+            case 'me_gusta': return '👍';
+            case 'me_encanta': return '❤️';
+            case 'me_divierte': return '😆';
+            case 'me_asombra': return '😮';
+            case 'me_entristece': return '😢';
+            case 'me_enoja': return '😡';
+            default: return '👍';
+        }
+    }
+
+    function obtenerNombreReaccion(tipo) {
+        switch(tipo) {
+            case 'me_gusta': return 'Me gusta';
+            case 'me_encanta': return 'Me encanta';
+            case 'me_divierte': return 'Me divierte';
+            case 'me_asombra': return 'Me asombra';
+            case 'me_entristece': return 'Me entristece';
+            case 'me_enoja': return 'Me enoja';
+            default: return 'Me gusta';
+        }
+    }
+
+    function obtenerColorReaccion(tipo) {
+        switch(tipo) {
+            case 'me_gusta': return '#D4A3AE'; // rose
+            case 'me_encanta': return '#dc3545'; // red
+            case 'me_divierte': return '#ffc107'; // yellow
+            case 'me_asombra': return '#ffc107'; // yellow
+            case 'me_entristece': return '#0dcaf0'; // teal
+            case 'me_enoja': return '#fd7e14'; // orange
+            default: return 'var(--text-muted)';
+        }
+    }
+
+    // Eventos del Feed
+    $('#btnTriggerPostFile').on('click', function() {
+        $('#postFoto').trigger('click');
+    });
+
+    $('#postFoto').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            if (file.size > 10 * 1024 * 1024) {
+                Swal.fire('Imagen muy pesada', 'La imagen no debe superar los 10MB.', 'warning');
+                $(this).val('');
+                return;
+            }
+            if (!file.type.match('image.*')) {
+                Swal.fire('Formato incorrecto', 'Por favor selecciona un archivo de imagen válido.', 'warning');
+                $(this).val('');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#postImagePreview').attr('src', e.target.result);
+                $('#postImagePreviewContainer').removeClass('d-none');
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    $('#btnRemovePostImage').on('click', function() {
+        $('#postFoto').val('');
+        $('#postImagePreview').attr('src', '');
+        $('#postImagePreviewContainer').addClass('d-none');
+    });
+
+    $('#feedPostForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const contenido = $('#postContenido').val().trim();
+        const fileInput = $('#postFoto')[0];
+        const tieneArchivo = fileInput.files && fileInput.files[0];
+
+        if (!contenido && !tieneArchivo) {
+            Swal.fire('Publicación vacía', 'Escribe un estado o sube una foto antes de publicar.', 'warning');
+            return;
+        }
+
+        const formData = new FormData(this);
+        $('#btnSubmitPost').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Publicando...');
+
+        $.ajax({
+            url: BASE_URL + '/api/feed/crear',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function(response) {
+                $('#btnSubmitPost').prop('disabled', false).html('<i class="bi bi-send-fill me-1.5"></i> Publicar');
+                if (response.status === 'success') {
+                    $('#feedPostForm')[0].reset();
+                    $('#btnRemovePostImage').click();
+                    cargarFeed();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Publicado con éxito',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function() {
+                $('#btnSubmitPost').prop('disabled', false).html('<i class="bi bi-send-fill me-1.5"></i> Publicar');
+                Swal.fire('Error', 'No se pudo enviar la publicación al servidor.', 'error');
+            }
+        });
+    });
+
+    // Reacciones
+    $(document).on('click', '.reaction-emoji-btn', function() {
+        const postId = $(this).data('id');
+        const tipo = $(this).data('type');
+        ejecutarReaccion(postId, tipo);
+    });
+
+    $(document).on('click', '.btn-reaction-toggle', function() {
+        const postId = $(this).data('id');
+        ejecutarReaccion(postId, 'me_gusta');
+    });
+
+    function ejecutarReaccion(postId, tipo) {
+        $.ajax({
+            url: BASE_URL + '/api/feed/reaccionar',
+            type: 'POST',
+            data: { post_id: postId, tipo: tipo },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    cargarFeed();
+                }
+            }
+        });
+    }
+
+    // Comentarios
+    $(document).on('click', '.btn-comment-focus', function() {
+        const postId = $(this).data('id');
+        $(`.comment-form[data-id="${postId}"] .comment-form-control`).focus();
+    });
+
+    $(document).on('submit', '.comment-form', function(e) {
+        e.preventDefault();
+        const postId = $(this).data('id');
+        const $input = $(this).find('.comment-form-control');
+        const contenido = $input.val().trim();
+
+        if (!contenido) return;
+
+        $.ajax({
+            url: BASE_URL + '/api/feed/comentar',
+            type: 'POST',
+            data: { post_id: postId, contenido: contenido },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    $input.val('');
+                    cargarFeed();
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function() {
+                Swal.fire('Error', 'No se pudo enviar el comentario.', 'error');
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-delete-comment', function() {
+        const commentId = $(this).data('id');
+        Swal.fire({
+            title: '¿Eliminar comentario?',
+            text: "Esta acción no se puede deshacer.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#D4A3AE',
+            cancelButtonColor: '#EBEBEB',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: BASE_URL + '/api/feed/comentario/eliminar',
+                    type: 'POST',
+                    data: { id: commentId },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $(`.comment-item[data-id="${commentId}"]`).fadeOut(350, function() {
+                                $(this).remove();
+                                cargarFeed();
+                            });
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
+                    }
+                });
+            }
+        });
+    });
+
+    // Eliminar Post
+    $(document).on('click', '.btn-delete-post', function(e) {
+        e.preventDefault();
+        const postId = $(this).data('id');
+        Swal.fire({
+            title: '¿Eliminar publicación?',
+            text: "Se borrarán de forma permanente todos los comentarios y reacciones asociados.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#D4A3AE',
+            cancelButtonColor: '#EBEBEB',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: BASE_URL + '/api/feed/eliminar',
+                    type: 'POST',
+                    data: { id: postId },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $(`.feed-post-card[data-id="${postId}"]`).fadeOut(350, function() {
+                                $(this).remove();
+                                cargarFeed();
+                            });
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
+                    }
+                });
+            }
+        });
+    });
+
+    // Compartir
+    $(document).on('click', '.btn-share-post', function() {
+        const postId = $(this).data('id');
+        const pName = $(this).data('project');
+        const content = $(this).data('content');
+        const img = $(this).data('img');
+        const avatar = $(this).data('avatar');
+        const date = $(this).data('date');
+
+        $('#sharePostIdInput').val(postId);
+        $('#sharePostContenido').val('');
+        $('#shareOriginalProjectName').text(pName);
+        $('#shareOriginalContent').text(content || 'Sin texto');
+        $('#shareOriginalDate').text(date);
+
+        if (avatar) {
+            $('#shareOriginalPhoto').attr('src', avatar);
+        } else {
+            $('#shareOriginalPhoto').attr('src', `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D4A3AE'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>`);
+        }
+
+        if (img) {
+            $('#shareOriginalImg').attr('src', img).removeClass('d-none');
+        } else {
+            $('#shareOriginalImg').addClass('d-none');
+        }
+
+        const shareModal = new bootstrap.Modal(document.getElementById('sharePostModal'));
+        shareModal.show();
+    });
+
+    $('#sharePostForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const postId = $('#sharePostIdInput').val();
+        const contenido = $('#sharePostContenido').val().trim();
+
+        $.ajax({
+            url: BASE_URL + '/api/feed/compartir',
+            type: 'POST',
+            data: { post_id: postId, contenido: contenido },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    const modalEl = document.getElementById('sharePostModal');
+                    const modalInst = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInst) modalInst.hide();
+                    
+                    cargarFeed();
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Publicación compartida',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function() {
+                Swal.fire('Error', 'No se pudo compartir la publicación.', 'error');
+            }
+        });
+    });
+
+    // Detectar cambio de pestaña para recargar el feed
+    $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+        if (e.target.id === 'feed-tab') {
+            cargarFeed();
+        }
+    });
+
 });
+

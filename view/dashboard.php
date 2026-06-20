@@ -17,7 +17,8 @@ $baseUrl = '/proposito';
     <!-- Local Bootstrap Icons -->
     <link rel="stylesheet" href="<?php echo $baseUrl; ?>/view/assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<?php echo $baseUrl; ?>/view/assets/css/dashboard.css?v=1.9">
+    <link rel="stylesheet" href="<?php echo $baseUrl; ?>/view/assets/css/dashboard.css?v=3.0">
+
 </head>
 <body>
 
@@ -33,10 +34,22 @@ $baseUrl = '/proposito';
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-lg-center mt-3 mt-lg-0">
+                    <!-- Navegación principal -->
+                    <li class="nav-item me-lg-2 mb-2 mb-lg-0">
+                        <a class="nav-link nav-page-link active" href="<?php echo $baseUrl; ?>/dashboard">
+                            <i class="bi bi-grid-1x2-fill me-1"></i> Dashboard
+                        </a>
+                    </li>
                     <li class="nav-item me-lg-3 mb-2 mb-lg-0">
-                        <span class="nav-link user-pill px-3 py-1.5">
-                            <i class="bi bi-person-circle me-1.5"></i>
-                            Hola, <strong id="navUserName"><?php echo htmlspecialchars($_SESSION['user_nombre']); ?></strong>
+                        <a class="nav-link nav-page-link" href="<?php echo $baseUrl; ?>/feed">
+                            <i class="bi bi-chat-square-heart-fill me-1"></i> Muro
+                        </a>
+                    </li>
+                    <!-- Perfil -->
+                    <li class="nav-item me-lg-3 mb-2 mb-lg-0">
+                        <span class="nav-link user-pill px-3 py-1.5 d-flex align-items-center" id="btnOpenPerfil" style="cursor: pointer;" title="Configurar Perfil">
+                            <img id="navUserAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D4A3AE'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Avatar" class="rounded-circle me-1.5" style="width: 24px; height: 24px; object-fit: cover; border: 1px solid #D4A3AE;">
+                            Hola,&nbsp;<strong id="navUserName"><?php echo htmlspecialchars($_SESSION['user_nombre']); ?></strong>
                         </span>
                     </li>
                     <li class="nav-item">
@@ -174,9 +187,10 @@ $baseUrl = '/proposito';
 
             <!-- Tabs Content -->
             <div class="tab-content card shadow-sm p-4 border-0 tab-content-card" id="dashboardTabsContent">
-                
+
                 <!-- INVENTARIO PANE -->
                 <div class="tab-pane fade show active" id="inventario-pane" role="tabpanel" aria-labelledby="inventario-tab" tabindex="0">
+
                     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
                         <div>
                             <h3 class="pane-title mb-0">Artículos Disponibles</h3>
@@ -883,6 +897,170 @@ $baseUrl = '/proposito';
         </div>
     </div>
 
+    <!-- PROFILE CONFIGURATION MODAL -->
+    <div class="modal" id="perfilModal" tabindex="-1" aria-labelledby="perfilModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content modal-custom border-0 shadow-lg">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-heading" id="perfilModalLabel"><i class="bi bi-person-gear text-rose me-2"></i> Mi Perfil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Nav Tabs for Profile -->
+                    <ul class="nav nav-tabs custom-tabs mb-4 justify-content-center" id="profileModalTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active px-3 py-2" id="profile-datos-tab" data-bs-toggle="tab" data-bs-target="#profile-datos-pane" type="button" role="tab" aria-controls="profile-datos-pane" aria-selected="true">
+                                <i class="bi bi-person-lines-fill me-1.5"></i> Datos Personales
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link px-3 py-2" id="profile-pass-tab" data-bs-toggle="tab" data-bs-target="#profile-pass-pane" type="button" role="tab" aria-controls="profile-pass-pane" aria-selected="false">
+                                <i class="bi bi-key-fill me-1.5"></i> Cambiar Contraseña
+                            </button>
+                        </li>
+                        <?php if (isset($_SESSION['user_email']) && $_SESSION['user_email'] === 'demarzomonterojose@gmail.com'): ?>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link px-3 py-2" id="profile-admin-tab" data-bs-toggle="tab" data-bs-target="#profile-admin-pane" type="button" role="tab" aria-controls="profile-admin-pane" aria-selected="false">
+                                <i class="bi bi-shield-lock-fill me-1.5"></i> Solicitudes de Registro
+                            </button>
+                        </li>
+                        <?php endif; ?>
+                    </ul>
+                    
+                    <div class="tab-content" id="profileModalTabsContent">
+                        <!-- DATOS PERSONALES -->
+                        <div class="tab-pane fade show active" id="profile-datos-pane" role="tabpanel" aria-labelledby="profile-datos-tab">
+                            <form id="profileDatosForm" enctype="multipart/form-data">
+                                <div class="text-center mb-4 position-relative">
+                                    <div class="profile-avatar-container mx-auto position-relative" style="width: 100px; height: 100px;">
+                                        <img id="profileAvatarPreview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D4A3AE'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Foto de perfil" class="rounded-circle border border-2 border-rose w-100 h-100 object-fit-cover shadow-sm">
+                                        <label for="profileFoto" class="btn btn-sm btn-light rounded-circle shadow-sm position-absolute bottom-0 end-0 p-1 border" style="cursor: pointer;" title="Cambiar foto">
+                                            <i class="bi bi-camera-fill text-muted"></i>
+                                        </label>
+                                    </div>
+                                    <input type="file" id="profileFoto" name="foto" class="d-none" accept="image/*">
+                                    <p class="text-muted small mt-2 mb-0">Subir foto de perfil (Máx. 2MB)</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="profileNombre" class="form-label">Nombre *</label>
+                                    <input type="text" class="form-control" id="profileNombre" name="nombre" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profileApellido" class="form-label">Apellido</label>
+                                    <input type="text" class="form-control" id="profileApellido" name="apellido">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profileTlf" class="form-label">Teléfono / Celular</label>
+                                    <input type="text" class="form-control" id="profileTlf" name="tlf">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Correo Electrónico (No editable)</label>
+                                    <input type="text" class="form-control bg-light" id="profileEmail" readonly>
+                                </div>
+                                
+                                <div class="text-end mt-4">
+                                    <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary-custom">Guardar Cambios</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- CAMBIAR CONTRASEÑA -->
+                        <div class="tab-pane fade" id="profile-pass-pane" role="tabpanel" aria-labelledby="profile-pass-tab">
+                            <form id="profilePassForm">
+                                <div class="mb-3">
+                                    <label for="profileCurrentPass" class="form-label">Contraseña Actual *</label>
+                                    <input type="password" class="form-control" id="profileCurrentPass" name="current_password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profileNewPass" class="form-label">Nueva Contraseña *</label>
+                                    <input type="password" class="form-control" id="profileNewPass" name="new_password" required minlength="6" placeholder="Mínimo 6 caracteres">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profileConfirmPass" class="form-label">Confirmar Nueva Contraseña *</label>
+                                    <input type="password" class="form-control" id="profileConfirmPass" name="confirm_password" required minlength="6">
+                                </div>
+                                
+                                <div class="text-end mt-4">
+                                    <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary-custom">Actualizar Contraseña</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <?php if (isset($_SESSION['user_email']) && $_SESSION['user_email'] === 'demarzomonterojose@gmail.com'): ?>
+                        <!-- SOLICITUDES DE REGISTRO (ADMIN) -->
+                        <div class="tab-pane fade" id="profile-admin-pane" role="tabpanel" aria-labelledby="profile-admin-tab">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="text-muted mb-0">Solicitudes de Registro Pendientes</h6>
+                                <button class="btn btn-sm btn-secondary-custom py-1 px-2" id="btnRefreshSolicitudes">
+                                    <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
+                                </button>
+                            </div>
+                            
+                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                <table class="table table-hover align-middle mb-0 text-start" id="tableSolicitudes" style="font-size: 0.85rem;">
+                                    <thead class="table-light sticky-top" style="z-index: 10;">
+                                        <tr>
+                                            <th>Usuario</th>
+                                            <th>Mensaje (Pareja)</th>
+                                            <th class="text-end">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminSolicitudesBody">
+                                        <!-- Cargado dinámicamente con AJAX -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="noSolicitudesAlert" class="text-center py-4 d-none">
+                                <i class="bi bi-inbox text-muted" style="font-size: 2.5rem;"></i>
+                                <p class="text-muted small mt-2 mb-0">No hay solicitudes pendientes de aprobación.</p>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!-- SHARE POST MODAL -->
+    <div class="modal" id="sharePostModal" tabindex="-1" aria-labelledby="sharePostModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-custom border-0 shadow-lg">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-heading" id="sharePostModalLabel"><i class="bi bi-share-fill text-rose me-2"></i> Compartir Publicación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="sharePostForm">
+                    <input type="hidden" id="sharePostIdInput" name="post_id" value="">
+                    <div class="modal-body p-4">
+                        <div class="form-group mb-3">
+                            <label for="sharePostContenido" class="form-label fw-bold">Añade un comentario (opcional):</label>
+                            <textarea class="form-control" id="sharePostContenido" name="contenido" rows="3" placeholder="¿Qué quieres comentar al compartir esta publicación?"></textarea>
+                        </div>
+                        
+                        <!-- Original Post Preview Card -->
+                        <div class="card bg-light border-0 p-3 rounded">
+                            <div class="d-flex align-items-center mb-2">
+                                <img id="shareOriginalPhoto" src="" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23D4A3AE\'><path d=\'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z\'/></svg>';">
+                                <div>
+                                    <h6 id="shareOriginalProjectName" class="mb-0 small fw-bold text-dark">Nombre de Pareja</h6>
+                                    <span id="shareOriginalDate" class="text-muted small" style="font-size: 0.75rem;">Fecha</span>
+                                </div>
+                            </div>
+                            <p id="shareOriginalContent" class="mb-2 text-muted small mb-0"></p>
+                            <img id="shareOriginalImg" src="" class="img-fluid rounded d-none mt-2" style="max-height: 200px; object-fit: cover; width: 100%;">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary-custom" id="btnConfirmShare">Compartir ahora</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Local Vendor JS -->
     <script src="<?php echo $baseUrl; ?>/view/assets/vendor/jquery.min.js"></script>
     <script src="<?php echo $baseUrl; ?>/view/assets/vendor/bootstrap.bundle.min.js"></script>
@@ -893,6 +1071,8 @@ $baseUrl = '/proposito';
         const BASE_URL = '<?php echo $baseUrl; ?>';
         const CURRENT_USER_ID = <?php echo $_SESSION['user_id']; ?>;
     </script>
-    <script src="<?php echo $baseUrl; ?>/view/assets/js/dashboard.js?v=2.1"></script>
+    <script src="<?php echo $baseUrl; ?>/view/assets/js/imageUtils.js?v=1.1"></script>
+    <script src="<?php echo $baseUrl; ?>/view/assets/js/dashboard.js?v=3.1"></script>
+
 </body>
 </html>
